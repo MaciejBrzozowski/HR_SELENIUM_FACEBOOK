@@ -9,13 +9,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import pl.brzozowski.maciej.util.TestProperties;
 
 import static java.time.Duration.ofSeconds;
-import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
 import static pl.brzozowski.maciej.util.Configuration.*;
 
@@ -42,7 +40,8 @@ public class FacebookTest {
         loginUser(testProperties.getUserName(), testProperties.getUserPassword());
         //when
         preparePost();
-        webDriver.findElement(By.xpath(POST_FRAME)).sendKeys(HELLO_WORLD);
+        publishPost();
+        sleep(3000);
         //then
         //TODO make assertion to check if post was created
     }
@@ -50,6 +49,16 @@ public class FacebookTest {
     @After
     public void tearDown() {
         webDriver.quit();
+    }
+
+    private void publishPost() {
+        webDriver.findElement(By.xpath(POST_FRAME)).sendKeys(HELLO_WORLD);
+        webDriver.findElements(By.tagName("button")).stream()
+                .filter(WebElement::isDisplayed)
+                .filter(WebElement::isEnabled)
+                .filter(e -> e.getText().toLowerCase().matches("share"))
+                .findFirst()
+                .ifPresent(WebElement::click);
     }
 
     private void preparePost() {
@@ -66,4 +75,12 @@ public class FacebookTest {
         webDriver.findElement(By.xpath(PASSWORD)).sendKeys(password + ENTER);
     }
 
+
+    private void sleep(int timeout) {
+        try {
+            Thread.sleep(timeout);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
